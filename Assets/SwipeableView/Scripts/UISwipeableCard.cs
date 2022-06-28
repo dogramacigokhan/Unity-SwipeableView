@@ -6,7 +6,7 @@ namespace SwipeableView
 {
     public class UISwipeableCard<TData, TContext> : MonoBehaviour, ISwipeable where TContext : class
     {
-        [SerializeField] SwipeableViewData _viewData = default;
+        [SerializeField] private SwipeableViewData viewData;
 
         /// <summary>
         /// Index of Card Data.
@@ -24,40 +24,40 @@ namespace SwipeableView
         public TData Data { get; private set; }
         public TContext Context { get; private set; }
 
-        RectTransform _cachedRect;
-        int _screenSize;
+        private RectTransform cachedRect;
+        private int screenSize;
 
-        const float _epsion = 1.192093E-07f;
+        private const float Epsion = 1.192093E-07f;
 
-        void OnEnable()
+        private void OnEnable()
         {
-            _cachedRect = transform as RectTransform;
-            _screenSize = Screen.height > Screen.width ? Screen.width : Screen.height;
+            this.cachedRect = this.transform as RectTransform;
+            this.screenSize = Screen.height > Screen.width ? Screen.width : Screen.height;
         }
 
-        void Update()
+        private void Update()
         {
-            var rectPosX = _cachedRect.localPosition.x;
-            if (Math.Abs(rectPosX) < _epsion)
+            var rectPosX = this.cachedRect.localPosition.x;
+            if (Math.Abs(rectPosX) < Epsion)
             {
-                SwipingRight(0);
-                SwipingLeft(0);
+                this.SwipingRight(0);
+                this.SwipingLeft(0);
                 return;
             }
 
-            var t = GetCurrentPosition(rectPosX);
-            var maxAngle = rectPosX < 0 ? _viewData.MaxInclinationAngle : -_viewData.MaxInclinationAngle;
-            UpdateRotation(Vector3.Lerp(Vector3.zero, new Vector3(0f, 0f, maxAngle), t));
+            var t = this.GetCurrentPosition(rectPosX);
+            var maxAngle = rectPosX < 0 ? this.viewData.MaxInclinationAngle : -this.viewData.MaxInclinationAngle;
+            this.UpdateRotation(Vector3.Lerp(Vector3.zero, new Vector3(0f, 0f, maxAngle), t));
 
             if (rectPosX > 0)
             {
-                SwipingRight(t);
-                ActionSwipingRight?.Invoke(this, t);
+                this.SwipingRight(t);
+                this.ActionSwipingRight?.Invoke(this, t);
             }
             else if (rectPosX < 0)
             {
-                SwipingLeft(t);
-                ActionSwipingLeft?.Invoke(this, t);
+                this.SwipingLeft(t);
+                this.ActionSwipingLeft?.Invoke(this, t);
             }
         }
 
@@ -68,7 +68,7 @@ namespace SwipeableView
         /// <param name="data"></param>
         public virtual void UpdateContent(TData data)
         {
-            Data = data;
+            this.Data = data;
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace SwipeableView
         /// <param name="context"></param>
         public virtual void SetContext(TContext context)
         {
-            Context = context;
+            this.Context = context;
         }
 
         /// <summary>
@@ -86,7 +86,7 @@ namespace SwipeableView
         /// <param name="visible"></param>
         public virtual void SetVisible(bool visible)
         {
-            gameObject.SetActive(visible);
+            this.gameObject.SetActive(visible);
         }
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace SwipeableView
         /// <param name="position"></param>
         public virtual void UpdatePosition(Vector3 position)
         {
-            _cachedRect.localPosition = position;
+            this.cachedRect.localPosition = position;
         }
 
         /// <summary>
@@ -104,7 +104,7 @@ namespace SwipeableView
         /// <param name="rotation"></param>
         public virtual void UpdateRotation(Vector3 rotation)
         {
-            _cachedRect.localEulerAngles = rotation;
+            this.cachedRect.localEulerAngles = rotation;
         }
 
         /// <summary>
@@ -113,7 +113,7 @@ namespace SwipeableView
         /// <param name="scale"></param>
         public virtual void UpdateScale(float scale)
         {
-            _cachedRect.localScale = scale * Vector3.one;
+            this.cachedRect.localScale = scale * Vector3.one;
         }
 
         /// <summary>
@@ -133,81 +133,81 @@ namespace SwipeableView
 #region ISwipeable
         public void Swipe(Vector2 position)
         {
-            UpdatePosition(_cachedRect.localPosition + new Vector3(position.x, position.y, 0));
+            this.UpdatePosition(this.cachedRect.localPosition + new Vector3(position.x, position.y, 0));
         }
 
         public void EndSwipe()
         {
             // over required distance -> Auto swipe
-            if (IsSwipedRight(_cachedRect.localPosition))
+            if (this.IsSwipedRight(this.cachedRect.localPosition))
             {
-                AutoSwipeRight(_cachedRect.localPosition);
+                this.AutoSwipeRight(this.cachedRect.localPosition);
             }
-            else if (IsSwipedLeft(_cachedRect.localPosition))
+            else if (this.IsSwipedLeft(this.cachedRect.localPosition))
             {
-                AutoSwipeLeft(_cachedRect.localPosition);
+                this.AutoSwipeLeft(this.cachedRect.localPosition);
             }
             // Not been reached required distance -> Return to default position
             else
             {
-                StartCoroutine(MoveCoroutine(_cachedRect.localPosition, Vector3.zero));
+                this.StartCoroutine(this.MoveCoroutine(this.cachedRect.localPosition, Vector3.zero));
             }
         }
 
         public void AutoSwipeRight(Vector3 from)
         {
             var vec = from != Vector3.zero ? (from - Vector3.zero).normalized : Vector3.right;
-            var to = vec * _screenSize;
-            StartCoroutine(MoveCoroutine(from, to, () => ActionSwipedRight?.Invoke(this)));
+            var to = vec * this.screenSize;
+            this.StartCoroutine(this.MoveCoroutine(from, to, () => this.ActionSwipedRight?.Invoke(this)));
         }
 
         public void AutoSwipeLeft(Vector3 from)
         {
             var vec = from != Vector3.zero ? (from - Vector3.zero).normalized : Vector3.left;
-            var to = vec * _screenSize;
-            StartCoroutine(MoveCoroutine(from, to, () => ActionSwipedLeft?.Invoke(this)));
+            var to = vec * this.screenSize;
+            this.StartCoroutine(this.MoveCoroutine(from, to, () => this.ActionSwipedLeft?.Invoke(this)));
         }
 #endregion
 
-        bool IsSwipedRight(Vector3 position)
+private bool IsSwipedRight(Vector3 position)
         {
-            return position.x > 0 && position.x > GetRequiredDistance(position.x);
+            return position.x > 0 && position.x > this.GetRequiredDistance(position.x);
         }
 
-        bool IsSwipedLeft(Vector3 position)
+private bool IsSwipedLeft(Vector3 position)
         {
-            return position.x < 0 && position.x < GetRequiredDistance(position.x);
+            return position.x < 0 && position.x < this.GetRequiredDistance(position.x);
         }
 
-        float GetRequiredDistance(float positionX)
+private float GetRequiredDistance(float positionX)
         {
-            return positionX > 0 ? _cachedRect.rect.size.x / 2 : -(_cachedRect.rect.size.x / 2);
+            return positionX > 0 ? this.cachedRect.rect.size.x / 2 : -(this.cachedRect.rect.size.x / 2);
         }
 
-        float GetCurrentPosition(float positionX)
+private float GetCurrentPosition(float positionX)
         {
-            return positionX / GetRequiredDistance(positionX);
+            return positionX / this.GetRequiredDistance(positionX);
         }
 
-        IEnumerator MoveCoroutine(Vector3 from, Vector3 to, Action onComplete = null)
+private IEnumerator MoveCoroutine(Vector3 from, Vector3 to, Action onComplete = null)
         {
-            float endTime = Time.time + _viewData.SwipeDuration;
+            var endTime = Time.time + this.viewData.SwipeDuration;
 
             while (true)
             {
-                float diff = endTime - Time.time;
+                var diff = endTime - Time.time;
                 if (diff <= 0)
                 {
                     break;
                 }
 
-                var rate = 1 - Mathf.Clamp01(diff / _viewData.SwipeDuration);
-                var t = _viewData.CardAnimationCurve.Evaluate(rate);
-                _cachedRect.localPosition = Vector3.Lerp(from, to, t);
+                var rate = 1 - Mathf.Clamp01(diff / this.viewData.SwipeDuration);
+                var t = this.viewData.CardAnimationCurve.Evaluate(rate);
+                this.cachedRect.localPosition = Vector3.Lerp(from, to, t);
                 yield return null;
             }
 
-            _cachedRect.localPosition = to;
+            this.cachedRect.localPosition = to;
             onComplete?.Invoke();
         }
     }

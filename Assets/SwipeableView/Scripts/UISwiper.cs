@@ -5,9 +5,9 @@ namespace SwipeableView
 {
     public class UISwiper : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
     {
-        RectTransform cachedRect;
+        private RectTransform cachedRect;
 
-        ISwipeable swipeable;
+        private ISwipeable swipeable;
 
         /// <summary>
         /// Set the target.
@@ -16,7 +16,7 @@ namespace SwipeableView
         /// <param name="swipeable"></param>
         public void SetTarget(GameObject target, ISwipeable swipeable)
         {
-            cachedRect = target.transform as RectTransform;
+            this.cachedRect = target.transform as RectTransform;
             this.swipeable = swipeable;
         }
 
@@ -28,16 +28,17 @@ namespace SwipeableView
         {
             if (direction == SwipeDirection.Right)
             {
-                swipeable.AutoSwipeRight(Vector3.zero);
+                this.swipeable.AutoSwipeRight(Vector3.zero);
             }
             else
             {
-                swipeable.AutoSwipeLeft(Vector3.zero);
+                this.swipeable.AutoSwipeLeft(Vector3.zero);
             }
         }
 
 #region DragHandler
-        Vector2 pointerStartLocalPosition;
+
+private Vector2 pointerStartLocalPosition;
         void IBeginDragHandler.OnBeginDrag(PointerEventData eventData)
         {
             if (eventData.button != PointerEventData.InputButton.Left)
@@ -45,17 +46,16 @@ namespace SwipeableView
                 return;
             }
 
-            if (cachedRect == null || !cachedRect.gameObject.activeInHierarchy)
+            if (this.cachedRect == null || !this.cachedRect.gameObject.activeInHierarchy)
             {
                 return;
             }
 
-            pointerStartLocalPosition = Vector2.zero;
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                cachedRect,
+            this.pointerStartLocalPosition = Vector2.zero;
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(this.cachedRect,
                 eventData.position,
                 eventData.pressEventCamera,
-                out pointerStartLocalPosition
+                out this.pointerStartLocalPosition
             );
         }
 
@@ -66,14 +66,13 @@ namespace SwipeableView
                 return;
             }
 
-            if (cachedRect == null || !cachedRect.gameObject.activeInHierarchy)
+            if (this.cachedRect == null || !this.cachedRect.gameObject.activeInHierarchy)
             {
                 return;
             }
 
             Vector2 localCursor;
-            if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                    cachedRect,
+            if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(this.cachedRect,
                     eventData.position,
                     eventData.pressEventCamera,
                     out localCursor
@@ -82,8 +81,8 @@ namespace SwipeableView
                 return;
             }
 
-            var pointerDelta = localCursor - pointerStartLocalPosition;
-            swipeable.Swipe(pointerDelta);
+            var pointerDelta = localCursor - this.pointerStartLocalPosition;
+            this.swipeable.Swipe(pointerDelta);
         }
 
         void IEndDragHandler.OnEndDrag(PointerEventData eventData)
@@ -93,12 +92,12 @@ namespace SwipeableView
                 return;
             }
 
-            if (cachedRect == null || !cachedRect.gameObject.activeInHierarchy)
+            if (this.cachedRect == null || !this.cachedRect.gameObject.activeInHierarchy)
             {
                 return;
             }
 
-            swipeable.EndSwipe();
+            this.swipeable.EndSwipe();
         }
 #endregion
     }

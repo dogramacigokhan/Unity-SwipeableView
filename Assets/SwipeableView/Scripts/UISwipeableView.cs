@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace SwipeableView
@@ -12,7 +11,7 @@ namespace SwipeableView
         [SerializeField] private UISwiper swiper;
         [SerializeField] private SwipeableViewData viewData;
 
-        public event Action<UISwipeableCard<TData, TContext>> ActiveCardChanged;
+        public event Action<ISwipeable> ActiveCardChanged;
         public event Action<UISwipeableCard<TData, TContext>> ActionSwipedRight;
         public event Action<UISwipeableCard<TData, TContext>> ActionSwipedLeft;
 
@@ -50,6 +49,11 @@ namespace SwipeableView
                 card.DataIndex = i;
                 this.UpdateCardPosition(card);
                 this.cards[i] = card;
+
+                if (i == createCount - 1)
+                {
+                    this.UpdateSwiperTarget(card.gameObject);
+                }
             }
         }
 
@@ -70,10 +74,18 @@ namespace SwipeableView
             var card = cardObject.GetComponent<UISwipeableCard<TData, TContext>>();
             card.SetContext(this.Context);
             card.SetVisible(false);
-            card.ActionSwipedRight += args => this.ActionSwipedRight?.Invoke(args);
-            card.ActionSwipedLeft += args => this.ActionSwipedLeft?.Invoke(args);
-            card.ActionSwipedRight += this.UpdateCardPosition;
-            card.ActionSwipedLeft += this.UpdateCardPosition;
+            card.ActionSwipedRight += swipeableCard => this.ActionSwipedRight?.Invoke(swipeableCard);
+            card.ActionSwipedLeft += swipeableCard => this.ActionSwipedLeft?.Invoke(swipeableCard);
+            card.ActionSwipedRight += swipeableCard =>
+            {
+                this.UpdateCardPosition(swipeableCard);
+                this.UpdateSwiperTarget(swipeableCard.gameObject);
+            };
+            card.ActionSwipedLeft += swipeableCard =>
+            {
+                this.UpdateCardPosition(swipeableCard);
+                this.UpdateSwiperTarget(swipeableCard.gameObject);
+            };
             card.ActionSwipingRight += this.MoveToFrontNextCard;
             card.ActionSwipingLeft += this.MoveToFrontNextCard;
 
@@ -90,13 +102,19 @@ namespace SwipeableView
             var childCount = this.transform.childCount;
             card.UpdateScale(childCount == 1 ? 1f : this.viewData.BottomCardScale);
 
-            var target = childCount == 1 ? card.gameObject : this.transform.GetChild(1).gameObject;
-            this.swiper.SetTarget(target, target.GetComponent<ISwipeable>());
-
             // When there are three or more data,
             // Replace card index with the second index from here.
             var index = this.cards.Count < 2 ? card.DataIndex : card.DataIndex + 2;
             this.UpdateCard(card, index);
+        }
+
+        private void UpdateSwiperTarget(GameObject cardGameObject)
+        {
+            var childCount = this.transform.childCount;
+            var target = childCount == 1 ? cardGameObject : this.transform.GetChild(1).gameObject;
+            var targetSwipeable = target.GetComponent<ISwipeable>();
+            this.swiper.SetTarget(target, targetSwipeable);
+            this.ActiveCardChanged?.Invoke(targetSwipeable);
         }
 
         private void UpdateCard(UISwipeableCard<TData, TContext> card, int dataIndex)
@@ -113,7 +131,6 @@ namespace SwipeableView
             card.SetVisible(true);
             card.DataIndex = dataIndex;
             card.UpdateContent(this.data[dataIndex]);
-            this.ActiveCardChanged?.Invoke(card);
         }
 
         private void MoveToFrontNextCard(UISwipeableCard<TData, TContext> card, float rate)

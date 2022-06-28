@@ -70,8 +70,8 @@ namespace SwipeableView
             var card = cardObject.GetComponent<UISwipeableCard<TData, TContext>>();
             card.SetContext(this.Context);
             card.SetVisible(false);
-            card.ActionSwipedRight += this.ActionSwipedRight;
-            card.ActionSwipedLeft += this.ActionSwipedLeft;
+            card.ActionSwipedRight += args => this.ActionSwipedRight?.Invoke(args);
+            card.ActionSwipedLeft += args => this.ActionSwipedLeft?.Invoke(args);
             card.ActionSwipedRight += this.UpdateCardPosition;
             card.ActionSwipedLeft += this.UpdateCardPosition;
             card.ActionSwipingRight += this.MoveToFrontNextCard;

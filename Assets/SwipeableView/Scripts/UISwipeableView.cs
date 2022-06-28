@@ -12,6 +12,7 @@ namespace SwipeableView
         [SerializeField] private UISwiper swiper;
         [SerializeField] private SwipeableViewData viewData;
 
+        public event Action<UISwipeableCard<TData, TContext>> ActiveCardChanged;
         public event Action<UISwipeableCard<TData, TContext>> ActionSwipedRight;
         public event Action<UISwipeableCard<TData, TContext>> ActionSwipedLeft;
 
@@ -112,6 +113,7 @@ namespace SwipeableView
             card.SetVisible(true);
             card.DataIndex = dataIndex;
             card.UpdateContent(this.data[dataIndex]);
+            this.ActiveCardChanged?.Invoke(card);
         }
 
         private void MoveToFrontNextCard(UISwipeableCard<TData, TContext> card, float rate)

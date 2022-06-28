@@ -21,7 +21,7 @@ namespace SwipeableView
         }
 
         /// <summary>
-        /// Auto Swipe to the specified derection.
+        /// Auto Swipe to the specified direction.
         /// </summary>
         /// <param name="direction"></param>
         public void AutoSwipe(SwipeDirection direction)

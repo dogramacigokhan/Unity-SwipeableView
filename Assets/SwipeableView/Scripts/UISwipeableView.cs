@@ -29,7 +29,7 @@ namespace SwipeableView
 
         private List<TData> data = new List<TData>();
 
-        private readonly List<UISwipeableCard<TData, TContext>> cards = new List<UISwipeableCard<TData, TContext>>(MaxCreateCardCount);
+        private readonly Dictionary<int, UISwipeableCard<TData, TContext>> cards = new Dictionary<int, UISwipeableCard<TData, TContext>>(MaxCreateCardCount);
         private const int MaxCreateCardCount = 2;
 
         /// <summary>
@@ -48,12 +48,12 @@ namespace SwipeableView
                 var card = this.CreateCard();
                 card.DataIndex = i;
                 this.UpdateCardPosition(card);
-                this.cards.Add(card);
+                this.cards[i] = card;
             }
         }
 
         /// <summary>
-        /// Auto Swipe to the specified derection.
+        /// Auto Swipe to the specified direction.
         /// </summary>
         /// <param name="direction"></param>
         public void AutoSwipe(SwipeDirection direction)
@@ -116,8 +116,10 @@ namespace SwipeableView
 
         private void MoveToFrontNextCard(UISwipeableCard<TData, TContext> card, float rate)
         {
-            var nextCard = this.cards.FirstOrDefault(c => c.DataIndex != card.DataIndex);
-            if (nextCard == null) return;
+            if (!this.cards.TryGetValue(card.DataIndex + 1, out var nextCard))
+            {
+                return;
+            }
 
             var t = this.viewData.CardAnimationCurve.Evaluate(rate);
             nextCard.UpdateScale(Mathf.Lerp(this.viewData.BottomCardScale, 1f, t));

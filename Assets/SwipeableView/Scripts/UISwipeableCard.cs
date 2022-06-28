@@ -21,8 +21,8 @@ namespace SwipeableView
         public event Action<UISwipeableCard<TData, TContext>, float> ActionSwipingRight;
         public event Action<UISwipeableCard<TData, TContext>, float> ActionSwipingLeft;
 
-        protected TData Data { get; private set; }
-        protected TContext Context { get; private set; }
+        public TData Data { get; private set; }
+        public TContext Context { get; private set; }
 
         RectTransform _cachedRect;
         int _screenSize;

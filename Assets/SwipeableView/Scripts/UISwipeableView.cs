@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -10,6 +11,9 @@ namespace SwipeableView
         [SerializeField] Transform _cardRoot = default;
         [SerializeField] UISwiper _swiper = default;
         [SerializeField] SwipeableViewData _viewData = default;
+
+        public event Action<UISwipeableCard<TData, TContext>> ActionSwipedRight;
+        public event Action<UISwipeableCard<TData, TContext>> ActionSwipedLeft;
 
         /// <summary>
         /// Is the card swiping.
@@ -66,6 +70,8 @@ namespace SwipeableView
             var card = cardObject.GetComponent<UISwipeableCard<TData, TContext>>();
             card.SetContext(Context);
             card.SetVisible(false);
+            card.ActionSwipedRight += ActionSwipedRight;
+            card.ActionSwipedLeft += ActionSwipedLeft;
             card.ActionSwipedRight += UpdateCardPosition;
             card.ActionSwipedLeft += UpdateCardPosition;
             card.ActionSwipingRight += MoveToFrontNextCard;

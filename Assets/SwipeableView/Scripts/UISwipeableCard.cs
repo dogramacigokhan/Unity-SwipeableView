@@ -21,6 +21,7 @@ namespace SwipeableView
         public event Action<UISwipeableCard<TData, TContext>, float> ActionSwipingRight;
         public event Action<UISwipeableCard<TData, TContext>, float> ActionSwipingLeft;
 
+        protected TData Data { get; private set; }
         protected TContext Context { get; private set; }
 
         RectTransform _cachedRect;
@@ -66,7 +67,9 @@ namespace SwipeableView
         /// </summary>
         /// <param name="data"></param>
         public virtual void UpdateContent(TData data)
-        { }
+        {
+            Data = data;
+        }
 
         /// <summary>
         /// Set the Context.

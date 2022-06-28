@@ -1,0 +1,12 @@
+{
+  "name": "com.gdpackages.swipeable-view",
+  "displayName": "Swipeable View",
+  "version": "1.0.0",
+  "unity": "2021.3",
+  "author": {
+    "name": "Gokhan Dogramaci",
+    "email": "dogramacigokhan@gmail.com",
+    "url": "https://github.com/dogramacigokhan"
+  },
+  "dependencies": {}
+}

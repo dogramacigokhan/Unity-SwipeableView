@@ -28,7 +28,7 @@ public class TextureDownloader : MonoBehaviour
         {
             yield return www.SendWebRequest();
 
-            if (www.isNetworkError)
+            if (www.result != UnityWebRequest.Result.Success)
             {
                 Debug.LogErrorFormat("Error: {0}", www.error);
                 yield break;

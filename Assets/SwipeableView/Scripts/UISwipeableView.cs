@@ -25,7 +25,7 @@ namespace SwipeableView
         /// </summary>
         protected bool ExistsCard { get; private set; }
 
-        protected TContext Context { get; }
+        protected TContext Context { get; set; }
 
         private List<TData> data = new List<TData>();
 
